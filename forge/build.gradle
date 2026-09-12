@@ -3,9 +3,7 @@ plugins {
 }
 
 loom {
-    forge {
-//        mixinConfig "createdynlight.mixins.json"
-    }
+    forge {}
 
     runs {
         client {

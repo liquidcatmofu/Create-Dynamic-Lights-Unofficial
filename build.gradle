@@ -37,67 +37,31 @@ subprojects {
                 includeGroup "maven.modrinth"
             }
         }
-        exclusiveContent {
-            forRepository {
-                maven {
-                    url "https://cursemaven.com"
-                }
-            }
-            filter {
-                includeGroup "curse.maven"
-            }
-        }
         maven {
             url "https://maven.tterrag.com/"
         }
         maven {
-            url "https://maven.blamejared.com"
+            name = "Create Fabric snapshots"
+            url = "https://mvn.devos.one/snapshots/"
         }
         maven {
+            name = "Create Fabric releases"
             url = "https://mvn.devos.one/releases/"
         }
         maven {
-            url = "https://maven.theillusivec4.top/"
+            name = "Jamie's Maven"
+            url = "https://maven.jamieswhiteshirt.com/libs-release"
         }
         maven {
-            url "https://maven.squiddev.cc"
-            content {
-                includeGroup("cc.tweaked")
-            }
-        }
-        maven {
-            url "https://mvn.devos.one/snapshots/"
-        }
-        maven {
-            url "https://jitpack.io/"
-        }
-        maven {
-            url "https://maven.jamieswhiteshirt.com/libs-release"
-        }
-        maven {
-            // LambDynamicLights
-            url "https://maven.gegy.dev/releases/"
-        }
-
-        repositories {
-            maven {
-                name = "Terraformers"
-                url = "https://maven.terraformersmc.com/"
-            }
+            name = "Terraformers"
+            url = "https://maven.terraformersmc.com/"
         }
         maven {
             name = "Fuzs Mod Resources"
             url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
         }
-
-        maven {
-            name 'Gegy'
-            url 'https://maven.gegy.dev'
-        }
         maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
         maven { url = "https://maven.ithundxr.dev/mirror" } // Registrate
-        maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" } // ForgeConfigAPIPort
-
     }
 
     loom {
@@ -110,7 +74,6 @@ subprojects {
             officialMojangMappings()
             parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
         }
-//        mappings loom.officialMojangMappings()
     }
 
     java {
