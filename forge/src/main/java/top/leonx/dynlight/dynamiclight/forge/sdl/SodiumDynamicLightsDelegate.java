@@ -1,22 +1,23 @@
-package top.leonx.dynlight.lamb.forge;
+package top.leonx.dynlight.dynamiclight.forge.sdl;
 
-import toni.sodiumdynamiclights.DynamicLightSource;
-import toni.sodiumdynamiclights.SodiumDynamicLights;
-import toni.sodiumdynamiclights.DynamicLightsConfig;
-import toni.sodiumdynamiclights.DynamicLightsMode;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import top.leonx.dynlight.lamb.CreateDynLightSource;
+import toni.sodiumdynamiclights.DynamicLightSource;
+import toni.sodiumdynamiclights.DynamicLightsConfig;
+import toni.sodiumdynamiclights.DynamicLightsMode;
+import toni.sodiumdynamiclights.SodiumDynamicLights;
+import top.leonx.dynlight.dynamiclight.CreateDynLightSource;
 
 import java.util.Objects;
 
-public class LambDynLightsDelegateImpl {
-
-    public static void scheduleChunkRebuild(LevelRenderer levelRenderer, long pos){
-        SodiumDynamicLights.scheduleChunkRebuild(levelRenderer, pos);
+public final class SodiumDynamicLightsDelegate {
+    private SodiumDynamicLightsDelegate() {
     }
 
+    public static void scheduleChunkRebuild(LevelRenderer levelRenderer, long pos) {
+        SodiumDynamicLights.scheduleChunkRebuild(levelRenderer, pos);
+    }
 
     public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet trackedLitChunkPositions, LongOpenHashSet newPos) {
         SodiumDynamicLights.updateTrackedChunks(chunkPos, trackedLitChunkPositions, newPos);
@@ -39,14 +40,13 @@ public class LambDynLightsDelegateImpl {
         return !Objects.equals(mode, DynamicLightsMode.OFF);
     }
 
-    public static int getDynamicLightsModeDelay(){
+    public static int getDynamicLightsModeDelay() {
         DynamicLightsMode mode = DynamicLightsConfig.DYNAMIC_LIGHTS_MODE.get();
         if (Objects.equals(mode, DynamicLightsMode.SLOW)) {
             return 500;
         } else if (Objects.equals(mode, DynamicLightsMode.FAST)) {
             return 200;
-        } else {
-            return 0;
         }
+        return 0;
     }
 }

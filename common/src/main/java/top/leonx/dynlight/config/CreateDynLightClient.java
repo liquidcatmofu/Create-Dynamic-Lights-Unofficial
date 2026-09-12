@@ -2,7 +2,7 @@ package top.leonx.dynlight.config;
 
 import net.createmod.catnip.config.ConfigBase;
 import org.jetbrains.annotations.NotNull;
-import top.leonx.dynlight.lamb.LambDynLightsDelegate;
+import top.leonx.dynlight.dynamiclight.DynamicLightsDelegate;
 
 public class CreateDynLightClient extends ConfigBase {
 
@@ -22,7 +22,7 @@ public class CreateDynLightClient extends ConfigBase {
     public int getUpdateInterval(){
         if(ignoreLambModeSetting.get())
             return updateInterval.get();
-        return updateInterval.get() + LambDynLightsDelegate.getDynamicLightsModeDelay();
+        return updateInterval.get() + DynamicLightsDelegate.getDynamicLightsModeDelay();
     }
 
     public static class Comments {

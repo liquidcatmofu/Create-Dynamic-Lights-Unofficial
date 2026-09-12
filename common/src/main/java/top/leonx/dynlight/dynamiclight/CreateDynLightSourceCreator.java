@@ -1,11 +1,11 @@
-package top.leonx.dynlight.lamb.forge;
+package top.leonx.dynlight.dynamiclight;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
+import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.core.BlockPos;
-import top.leonx.dynlight.lamb.CreateDynLightSource;
-
-public class CreateDynLightSourceCreatorImpl {
+public class CreateDynLightSourceCreator {
+    @ExpectPlatform
     public static CreateDynLightSource createDynLightSource(AbstractContraptionEntity entity, BlockPos blockPos, int luminance) {
-        return new CreateDynLightSourceForge(entity, blockPos, luminance);
+        throw new AssertionError();
     }
 }

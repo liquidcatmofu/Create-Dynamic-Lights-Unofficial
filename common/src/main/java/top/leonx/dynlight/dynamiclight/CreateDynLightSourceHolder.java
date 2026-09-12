@@ -1,4 +1,4 @@
-package top.leonx.dynlight.lamb;
+package top.leonx.dynlight.dynamiclight;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import net.minecraft.core.BlockPos;
@@ -27,7 +27,7 @@ public class CreateDynLightSourceHolder {
         } finally {
             lightSourcesLock.writeLock().unlock();
         }
-        LambDynLightsDelegate.addLightSource(lightSource);
+        DynamicLightsDelegate.addLightSource(lightSource);
         return lightSource;
     }
 
@@ -37,7 +37,7 @@ public class CreateDynLightSourceHolder {
         try {
             var lightSource = lightSources.remove(new LightSourceKey(entityId, blockPos));
             if (lightSource != null) {
-                LambDynLightsDelegate.removeLightSource(lightSource);
+                DynamicLightsDelegate.removeLightSource(lightSource);
             }
         } finally {
             lightSourcesLock.writeLock().unlock();
@@ -53,7 +53,7 @@ public class CreateDynLightSourceHolder {
             for (BlockPos blockPos : contraption.getBlocks().keySet()) {
                 var lightSource = lightSources.remove(new LightSourceKey(contraptionEntity.getId(), blockPos));
                 if (lightSource != null) {
-                    LambDynLightsDelegate.removeLightSource(lightSource);
+                    DynamicLightsDelegate.removeLightSource(lightSource);
                 }
             }
         } finally {

@@ -1,4 +1,4 @@
-package top.leonx.dynlight.lamb;
+package top.leonx.dynlight.dynamiclight;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import net.createmod.catnip.math.VecHelper;
@@ -105,7 +105,7 @@ public abstract class CreateDynLightSource {
     }
 
     public boolean shouldUpdateDynamicLight() {
-        if (!CreateDynLightAllConfigs.client().enableLambDynamicLight.get() || !LambDynLightsDelegate.getDynamicLightsModeEnabled())
+        if (!CreateDynLightAllConfigs.client().enableLambDynamicLight.get() || !DynamicLightsDelegate.getDynamicLightsModeEnabled())
             return false;
 
         int delay = CreateDynLightAllConfigs.client().getUpdateInterval();
@@ -143,8 +143,8 @@ public abstract class CreateDynLightSource {
                 var entityChunkPos = this.chunkPosition;
                 var chunkPos = new BlockPos.MutableBlockPos(entityChunkPos.x, SectionPos.posToSectionCoord(this.position.y), entityChunkPos.z);
 
-                LambDynLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
-                LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
+                DynamicLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
+                DynamicLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
 
                 var directionX = (this.blockPosition().getX() & 15) >= 8 ? Direction.EAST : Direction.WEST;
                 var directionY = (this.blockPosition().getY() & 15) >= 8 ? Direction.UP : Direction.DOWN;
@@ -161,8 +161,8 @@ public abstract class CreateDynLightSource {
                         chunkPos.move(directionZ.getOpposite()); // origin
                         chunkPos.move(directionY); // Y
                     }
-                    LambDynLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
-                    LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
+                    DynamicLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
+                    DynamicLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
                 }
             }
 
@@ -179,7 +179,7 @@ public abstract class CreateDynLightSource {
     public void scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
         if (this.contraptionEntity.level() == Minecraft.getInstance().level)
             for (long pos : this.trackedLitChunkPositions) {
-                LambDynLightsDelegate.scheduleChunkRebuild(renderer, pos);
+                DynamicLightsDelegate.scheduleChunkRebuild(renderer, pos);
             }
     }
 }

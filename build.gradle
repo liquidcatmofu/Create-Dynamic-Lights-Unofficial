@@ -24,6 +24,7 @@ subprojects {
     }
 
     repositories {
+        maven { url = "https://maven.architectury.dev/" }
         maven { url = "https://maven.parchmentmc.org" }
 
         exclusiveContent {

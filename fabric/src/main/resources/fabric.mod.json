@@ -2,13 +2,18 @@
   "schemaVersion": 1,
   "id": "createdynlight",
   "version": "${version}",
-  "name": "Create: Dynamic Light",
-  "description": "Add dynamic lights to the Create mod.",
+  "name": "Create: Dynamic Lights (Unofficial)",
+  "description": "Unofficial maintenance fork adding dynamic lights to moving Create contraptions.",
   "authors": [
     "Leon"
   ],
+  "contributors": [
+    "LiquidCatMofu"
+  ],
   "contact": {
-    "sources": "https://github.com/leon-o/Create-Dynamic-Lights"
+    "homepage": "https://github.com/liquidcatmofu/Create-Dynamic-Lights",
+    "sources": "https://github.com/liquidcatmofu/Create-Dynamic-Lights",
+    "issues": "https://github.com/liquidcatmofu/Create-Dynamic-Lights/issues"
   },
   "license": "MIT",
   "icon": "assets/createdynlight/icon.png",
@@ -23,13 +28,14 @@
   },
   "mixins": [],
   "depends": {
-    "fabricloader": ">=0.14.0",
-    "minecraft": "~1.20.1",
+    "fabricloader": ">=0.16.0",
+    "minecraft": "=1.20.1",
     "java": ">=17",
     "fabric-api": "*",
-    "create": ">=6.0.0"
+    "create": ">=6.0.0 <6.1.0"
   },
   "suggests": {
-    "sodiumdynamiclights" : ">=1.0.0"
+    "sodiumdynamiclights": ">=1.0.0",
+    "ryoamiclights": ">=0.2.3"
   }
 }

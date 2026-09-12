@@ -1,4 +1,4 @@
-package top.leonx.dynlight.lamb.forge;
+package top.leonx.dynlight.dynamiclight.forge.sdl;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import toni.sodiumdynamiclights.DynamicLightSource;
@@ -6,10 +6,10 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
-import top.leonx.dynlight.lamb.CreateDynLightSource;
+import top.leonx.dynlight.dynamiclight.CreateDynLightSource;
 
-public class CreateDynLightSourceForge extends CreateDynLightSource implements DynamicLightSource {
-    public CreateDynLightSourceForge(AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
+public class SodiumDynamicLightSource extends CreateDynLightSource implements DynamicLightSource {
+    public SodiumDynamicLightSource(AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
         super(entity, localPos, luminance);
     }
 

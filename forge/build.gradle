@@ -2,6 +2,11 @@ plugins {
     id 'com.github.johnrengelman.shadow'
 }
 
+def dynamicLightsBackend = providers.gradleProperty('dynamicLightsBackend').getOrElse('sodium')
+if (!['sodium', 'ryoamic'].contains(dynamicLightsBackend)) {
+    throw new GradleException("dynamicLightsBackend must be 'sodium' or 'ryoamic'")
+}
+
 loom {
     forge {}
 
@@ -47,7 +52,16 @@ dependencies {
     modImplementation ("com.tterrag.registrate:Registrate:${registrate_version}")
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.4.1"))
     implementation("io.github.llamalad7:mixinextras-forge:0.4.1")
-    modImplementation ("maven.modrinth:sodium-dynamic-lights:${dynamiclights_forge_version}")
+    modCompileOnly ("maven.modrinth:sodium-dynamic-lights:${dynamiclights_forge_version}")
+    modCompileOnly ("maven.modrinth:reCfnRvJ:${ryoamiclights_forge_version}")
+    modCompileOnly ("maven.modrinth:obsidianui:${obsidianui_version}-forge")
+    if (dynamicLightsBackend == 'ryoamic') {
+        modLocalRuntime ("maven.modrinth:reCfnRvJ:${ryoamiclights_forge_version}")
+        modLocalRuntime ("maven.modrinth:obsidianui:${obsidianui_version}-forge")
+        modLocalRuntime ("dev.architectury:architectury-forge:${architectury_api_version}")
+    } else {
+        modLocalRuntime ("maven.modrinth:sodium-dynamic-lights:${dynamiclights_forge_version}")
+    }
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')
     modLocalRuntime ("maven.modrinth:embeddium:${embeddium_version}+mc${minecraft_version}")
     modLocalRuntime ("maven.modrinth:oculus:${oculus_version}")

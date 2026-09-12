@@ -124,7 +124,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Set up Java 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
@@ -227,7 +227,8 @@ jobs:
           echo "forge=$forge_jar" >> "$GITHUB_OUTPUT"
 
       - name: Upload validated release candidates
-        uses: actions/upload-artifact@v4
+        if: ${{ env.ACT != 'true' }}
+        uses: actions/upload-artifact@v7
         with:
           name: release-candidates-${{ steps.release.outputs.release_version }}
           path: dist/
@@ -286,11 +287,12 @@ jobs:
           game-versions: ${{ steps.release.outputs.minecraft_version }}
           game-version-filter: none
           java: 17
-          environment: client
+          environment: client* | server*
           dependencies: |
             fabric-api(required){curseforge:306612}
             create(required){curseforge:create}
             sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
+            ryoamiclights(optional){curseforge:913587}
           retry-attempts: 2
           fail-mode: fail
 
@@ -309,11 +311,12 @@ jobs:
           game-versions: ${{ steps.release.outputs.minecraft_version }}
           game-version-filter: none
           java: 17
-          environment: client
+          environment: client* | server*
           dependencies: |
             fabric-api(required){modrinth:P7dR8mSH}
             create(required){modrinth:create}
             sodium-dynamic-lights(optional){modrinth:sodium-dynamic-lights}
+            ryoamiclights(optional){modrinth:reCfnRvJ}
           retry-attempts: 2
           fail-mode: fail
 
@@ -332,10 +335,11 @@ jobs:
           game-versions: ${{ steps.release.outputs.minecraft_version }}
           game-version-filter: none
           java: 17
-          environment: client
+          environment: client* | server*
           dependencies: |
             create(required){curseforge:create}
             sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
+            ryoamiclights(optional){curseforge:913587}
           retry-attempts: 2
           fail-mode: fail
 
@@ -354,9 +358,10 @@ jobs:
           game-versions: ${{ steps.release.outputs.minecraft_version }}
           game-version-filter: none
           java: 17
-          environment: client
+          environment: client* | server*
           dependencies: |
             create(required){modrinth:create}
             sodium-dynamic-lights(optional){modrinth:sodium-dynamic-lights}
+            ryoamiclights(optional){modrinth:reCfnRvJ}
           retry-attempts: 2
           fail-mode: fail

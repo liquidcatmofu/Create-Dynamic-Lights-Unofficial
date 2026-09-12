@@ -5,13 +5,13 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.Entity;
-import top.leonx.dynlight.lamb.ContraptionEntityEventHandler;
+import top.leonx.dynlight.dynamiclight.ContraptionEntityEventHandler;
 
-public class LambModEventHandler {
+public class CreateDynLightModEventHandler {
     public static void register(){
-        ClientEntityEvents.ENTITY_LOAD.register(LambModEventHandler::onClientEntityLoad);
-        ClientEntityEvents.ENTITY_UNLOAD.register(LambModEventHandler::onClientEntityUnload);
-        ClientTickEvents.END_WORLD_TICK.register(LambModEventHandler::onTick);
+        ClientEntityEvents.ENTITY_LOAD.register(CreateDynLightModEventHandler::onClientEntityLoad);
+        ClientEntityEvents.ENTITY_UNLOAD.register(CreateDynLightModEventHandler::onClientEntityUnload);
+        ClientTickEvents.END_WORLD_TICK.register(CreateDynLightModEventHandler::onTick);
     }
 
     private static void onClientEntityLoad(Entity entity, ClientLevel clientLevel) {

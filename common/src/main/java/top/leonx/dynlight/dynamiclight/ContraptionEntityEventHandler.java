@@ -1,4 +1,4 @@
-package top.leonx.dynlight.lamb;
+package top.leonx.dynlight.dynamiclight;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.Contraption;

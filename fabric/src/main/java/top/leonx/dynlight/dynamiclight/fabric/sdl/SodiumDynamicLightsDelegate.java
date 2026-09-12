@@ -1,18 +1,19 @@
-package top.leonx.dynlight.lamb.fabric;
+package top.leonx.dynlight.dynamiclight.fabric.sdl;
 
-import toni.sodiumdynamiclights.DynamicLightSource;
-import toni.sodiumdynamiclights.SodiumDynamicLights;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
-import top.leonx.dynlight.lamb.CreateDynLightSource;
+import toni.sodiumdynamiclights.DynamicLightSource;
+import toni.sodiumdynamiclights.SodiumDynamicLights;
+import top.leonx.dynlight.dynamiclight.CreateDynLightSource;
 
-public class LambDynLightsDelegateImpl {
-
-    public static void scheduleChunkRebuild(LevelRenderer levelRenderer, long pos){
-        SodiumDynamicLights.scheduleChunkRebuild(levelRenderer, pos);
+public final class SodiumDynamicLightsDelegate {
+    private SodiumDynamicLightsDelegate() {
     }
 
+    public static void scheduleChunkRebuild(LevelRenderer levelRenderer, long pos) {
+        SodiumDynamicLights.scheduleChunkRebuild(levelRenderer, pos);
+    }
 
     public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet trackedLitChunkPositions, LongOpenHashSet newPos) {
         SodiumDynamicLights.updateTrackedChunks(chunkPos, trackedLitChunkPositions, newPos);
@@ -34,7 +35,7 @@ public class LambDynLightsDelegateImpl {
         return SodiumDynamicLights.get().config.getDynamicLightsMode().isEnabled();
     }
 
-    public static int getDynamicLightsModeDelay(){
+    public static int getDynamicLightsModeDelay() {
         return SodiumDynamicLights.get().config.getDynamicLightsMode().getDelay();
     }
 }

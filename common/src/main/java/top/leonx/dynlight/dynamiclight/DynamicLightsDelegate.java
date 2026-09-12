@@ -1,11 +1,11 @@
-package top.leonx.dynlight.lamb;
+package top.leonx.dynlight.dynamiclight;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 
-public class LambDynLightsDelegate {
+public class DynamicLightsDelegate {
     @ExpectPlatform
     public static void scheduleChunkRebuild(LevelRenderer levelRenderer, long pos){
         throw new AssertionError();
