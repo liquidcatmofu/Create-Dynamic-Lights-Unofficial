@@ -10,7 +10,7 @@
   "contact": {
     "sources": "https://github.com/leon-o/Create-Dynamic-Lights"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/createdynlight/icon.png",
   "environment": "*",
   "entrypoints": {
