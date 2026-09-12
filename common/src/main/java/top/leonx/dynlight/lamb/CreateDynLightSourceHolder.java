@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CreateDynLightSourceHolder {
@@ -17,16 +16,17 @@ public class CreateDynLightSourceHolder {
     private CreateDynLightSourceHolder() {
     }
 
-    AtomicInteger atomicInt = new AtomicInteger(0);
-    Map<LightSourceKey, CreateDynLightSource> lightSources = new HashMap<>();
+    private final Map<LightSourceKey, CreateDynLightSource> lightSources = new HashMap<>();
     private final ReentrantReadWriteLock lightSourcesLock = new ReentrantReadWriteLock();
 
     public CreateDynLightSource create(AbstractContraptionEntity entity, BlockPos blockPos, int luminance) {
-        var id = atomicInt.incrementAndGet();
-        var lightSource = CreateDynLightSourceCreator.createDynLightSource(id, entity, blockPos, luminance);
+        var lightSource = CreateDynLightSourceCreator.createDynLightSource(entity, blockPos, luminance);
         lightSourcesLock.writeLock().lock();
-        lightSources.put(new LightSourceKey(entity.getId(), blockPos), lightSource);
-        lightSourcesLock.writeLock().unlock();
+        try {
+            lightSources.put(new LightSourceKey(entity.getId(), blockPos), lightSource);
+        } finally {
+            lightSourcesLock.writeLock().unlock();
+        }
         LambDynLightsDelegate.addLightSource(lightSource);
         return lightSource;
     }
@@ -34,11 +34,14 @@ public class CreateDynLightSourceHolder {
     @SuppressWarnings("unused")
     public void remove(int entityId, BlockPos blockPos) {
         lightSourcesLock.writeLock().lock();
-        var lightSource = lightSources.remove(new LightSourceKey(entityId, blockPos));
-        if (lightSource != null) {
-            LambDynLightsDelegate.removeLightSource(lightSource);
+        try {
+            var lightSource = lightSources.remove(new LightSourceKey(entityId, blockPos));
+            if (lightSource != null) {
+                LambDynLightsDelegate.removeLightSource(lightSource);
+            }
+        } finally {
+            lightSourcesLock.writeLock().unlock();
         }
-        lightSourcesLock.writeLock().unlock();
     }
 
     public void removeAll(AbstractContraptionEntity contraptionEntity) {
@@ -46,13 +49,16 @@ public class CreateDynLightSourceHolder {
         if (contraption == null)
             return;
         lightSourcesLock.writeLock().lock();
-        for (BlockPos blockPos : contraptionEntity.getContraption().getBlocks().keySet()) {
-            var lightSource = lightSources.remove(new LightSourceKey(contraptionEntity.getId(), blockPos));
-            if (lightSource != null) {
-                LambDynLightsDelegate.removeLightSource(lightSource);
+        try {
+            for (BlockPos blockPos : contraption.getBlocks().keySet()) {
+                var lightSource = lightSources.remove(new LightSourceKey(contraptionEntity.getId(), blockPos));
+                if (lightSource != null) {
+                    LambDynLightsDelegate.removeLightSource(lightSource);
+                }
             }
+        } finally {
+            lightSourcesLock.writeLock().unlock();
         }
-        lightSourcesLock.writeLock().unlock();
     }
 
     public Optional<CreateDynLightSource> get(int entityId, BlockPos blockPos) {
@@ -66,9 +72,11 @@ public class CreateDynLightSourceHolder {
 
     public Optional<CreateDynLightSource> get(LightSourceKey key) {
         lightSourcesLock.readLock().lock();
-        var lightSource = lightSources.get(key);
-        lightSourcesLock.readLock().unlock();
-        return Optional.ofNullable(lightSource);
+        try {
+            return Optional.ofNullable(lightSources.get(key));
+        } finally {
+            lightSourcesLock.readLock().unlock();
+        }
     }
 
     public static class LightSourceKey {

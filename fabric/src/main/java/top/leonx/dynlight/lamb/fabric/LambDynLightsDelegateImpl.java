@@ -14,23 +14,19 @@ public class LambDynLightsDelegateImpl {
     }
 
 
-    public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet lambdynlights$trackedLitChunkPos, LongOpenHashSet newPos) {
-        SodiumDynamicLights.updateTrackedChunks(chunkPos, lambdynlights$trackedLitChunkPos, newPos);
-    }
-
-    public static void scheduleChunkRebuild(LevelRenderer renderer, BlockPos.MutableBlockPos chunkPos) {
-        SodiumDynamicLights.scheduleChunkRebuild(renderer, chunkPos);
+    public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet trackedLitChunkPositions, LongOpenHashSet newPos) {
+        SodiumDynamicLights.updateTrackedChunks(chunkPos, trackedLitChunkPositions, newPos);
     }
 
     public static void addLightSource(CreateDynLightSource lightSource) {
-        if (lightSource instanceof DynamicLightSource forgeLightSource) {
-            SodiumDynamicLights.get().addLightSource(forgeLightSource);
+        if (lightSource instanceof DynamicLightSource dynamicLightSource) {
+            SodiumDynamicLights.get().addLightSource(dynamicLightSource);
         }
     }
 
     public static void removeLightSource(CreateDynLightSource lightSource) {
-        if (lightSource instanceof DynamicLightSource forgeLightSource) {
-            SodiumDynamicLights.get().removeLightSource(forgeLightSource);
+        if (lightSource instanceof DynamicLightSource dynamicLightSource) {
+            SodiumDynamicLights.get().removeLightSource(dynamicLightSource);
         }
     }
 

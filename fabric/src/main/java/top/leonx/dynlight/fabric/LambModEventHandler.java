@@ -27,6 +27,6 @@ public class LambModEventHandler {
     }
 
     private static void onTick(ClientLevel clientLevel) {
-        ContraptionEntityEventHandler.onTick(clientLevel);
+        ContraptionEntityEventHandler.onTick();
     }
 }

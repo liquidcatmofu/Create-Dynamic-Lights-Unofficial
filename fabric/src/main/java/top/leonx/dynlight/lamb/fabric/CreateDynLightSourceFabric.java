@@ -9,8 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import top.leonx.dynlight.lamb.CreateDynLightSource;
 
 public class CreateDynLightSourceFabric extends CreateDynLightSource implements DynamicLightSource {
-    public CreateDynLightSourceFabric(int id, AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
-        super(id, entity, localPos, luminance);
+    public CreateDynLightSourceFabric(AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
+        super(entity, localPos, luminance);
     }
 
     @Override
@@ -55,11 +55,11 @@ public class CreateDynLightSourceFabric extends CreateDynLightSource implements 
 
     @Override
     public boolean sodiumdynamiclights$updateDynamicLight(@NotNull LevelRenderer levelRenderer) {
-        return super.lambdynlights$updateDynamicLight(levelRenderer);
+        return super.updateDynamicLight(levelRenderer);
     }
 
     @Override
     public void sodiumdynamiclights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer levelRenderer) {
-        super.lambdynlights$scheduleTrackedChunksRebuild(levelRenderer);
+        super.scheduleTrackedChunksRebuild(levelRenderer);
     }
 }

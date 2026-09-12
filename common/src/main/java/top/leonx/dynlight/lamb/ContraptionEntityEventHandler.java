@@ -2,7 +2,6 @@ package top.leonx.dynlight.lamb;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.Contraption;
-import net.minecraft.world.level.Level;
 import top.leonx.dynlight.config.CreateDynLightAllConfigs;
 
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class ContraptionEntityEventHandler {
         });
     }
 
-    public static void onTick(Level level) {
+    public static void onTick() {
         var toRemove = new ArrayList<AbstractContraptionEntity>();
         for (AbstractContraptionEntity entity : scheduledToAddContraptionEntities) {
             Contraption contraption = entity.getContraption();

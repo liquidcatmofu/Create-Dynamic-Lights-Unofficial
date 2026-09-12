@@ -23,20 +23,16 @@ public abstract class CreateDynLightSource {
     private int luminance;
     private int lastLuminance;
 
-    @SuppressWarnings({"FieldCanBeLocal", "unused"})
-    private final int id;
-
-    private long lambDynLightsLastUpdate;
+    private long lastUpdate;
 
     private ChunkPos chunkPosition;
 
     private BlockPos blockPos;
 
-    private LongOpenHashSet lambdynlights$trackedLitChunkPos = new LongOpenHashSet();
+    private LongOpenHashSet trackedLitChunkPositions = new LongOpenHashSet();
 
-    public CreateDynLightSource(int id, AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
+    public CreateDynLightSource(AbstractContraptionEntity entity, BlockPos localPos, int luminance) {
         this.contraptionEntity = entity;
-        this.id = id;
         this.luminance = luminance;
         lastPosition = Vec3.ZERO;
         this.localPos = localPos;
@@ -115,17 +111,17 @@ public abstract class CreateDynLightSource {
         int delay = CreateDynLightAllConfigs.client().getUpdateInterval();
         if (delay > 0) {
             long currentTime = System.currentTimeMillis();
-            if (currentTime < this.lambDynLightsLastUpdate + delay) {
+            if (currentTime < this.lastUpdate + delay) {
                 return false;
             }
 
-            this.lambDynLightsLastUpdate = currentTime;
+            this.lastUpdate = currentTime;
         }
         return true;
     }
 
 
-    public boolean lambdynlights$updateDynamicLight(@NotNull LevelRenderer renderer) {
+    public boolean updateDynamicLight(@NotNull LevelRenderer renderer) {
         if (!this.shouldUpdateDynamicLight())
             return false;
 
@@ -148,7 +144,7 @@ public abstract class CreateDynLightSource {
                 var chunkPos = new BlockPos.MutableBlockPos(entityChunkPos.x, SectionPos.posToSectionCoord(this.position.y), entityChunkPos.z);
 
                 LambDynLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
-                LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.lambdynlights$trackedLitChunkPos, newPos);
+                LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
 
                 var directionX = (this.blockPosition().getX() & 15) >= 8 ? Direction.EAST : Direction.WEST;
                 var directionY = (this.blockPosition().getY() & 15) >= 8 ? Direction.UP : Direction.DOWN;
@@ -166,23 +162,23 @@ public abstract class CreateDynLightSource {
                         chunkPos.move(directionY); // Y
                     }
                     LambDynLightsDelegate.scheduleChunkRebuild(renderer, chunkPos);
-                    LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.lambdynlights$trackedLitChunkPos, newPos);
+                    LambDynLightsDelegate.updateTrackedChunks(chunkPos, this.trackedLitChunkPositions, newPos);
                 }
             }
 
             // Schedules the rebuild of removed chunks.
-            this.lambdynlights$scheduleTrackedChunksRebuild(renderer);
+            this.scheduleTrackedChunksRebuild(renderer);
             // Update tracked lit chunks.
-            this.lambdynlights$trackedLitChunkPos = newPos;
+            this.trackedLitChunkPositions = newPos;
             return true;
         }
         return false;
     }
 
 
-    public void lambdynlights$scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
+    public void scheduleTrackedChunksRebuild(@NotNull LevelRenderer renderer) {
         if (this.contraptionEntity.level() == Minecraft.getInstance().level)
-            for (long pos : this.lambdynlights$trackedLitChunkPos) {
+            for (long pos : this.trackedLitChunkPositions) {
                 LambDynLightsDelegate.scheduleChunkRebuild(renderer, pos);
             }
     }

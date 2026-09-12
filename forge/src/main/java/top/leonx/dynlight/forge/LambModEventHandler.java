@@ -38,7 +38,7 @@ public class LambModEventHandler {
             return;
         }
         if (event.phase == TickEvent.Phase.END) {
-            ContraptionEntityEventHandler.onTick(event.level);
+            ContraptionEntityEventHandler.onTick();
         }
     }
 }

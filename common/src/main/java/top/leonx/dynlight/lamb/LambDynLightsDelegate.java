@@ -12,7 +12,7 @@ public class LambDynLightsDelegate {
     }
 
     @ExpectPlatform
-    public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet lambdynlights$trackedLitChunkPos, LongOpenHashSet newPos) {
+    public static void updateTrackedChunks(BlockPos.MutableBlockPos chunkPos, LongOpenHashSet trackedLitChunkPositions, LongOpenHashSet newPos) {
         throw new AssertionError();
     }
 

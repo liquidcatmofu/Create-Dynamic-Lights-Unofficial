@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import top.leonx.dynlight.lamb.CreateDynLightSource;
 
 public class CreateDynLightSourceCreatorImpl {
-    public static CreateDynLightSource createDynLightSource(int id, AbstractContraptionEntity entity, BlockPos blockPos, int luminance){
-        return new CreateDynLightSourceForge(id, entity, blockPos, luminance);
+    public static CreateDynLightSource createDynLightSource(AbstractContraptionEntity entity, BlockPos blockPos, int luminance) {
+        return new CreateDynLightSourceForge(entity, blockPos, luminance);
     }
 }
