@@ -1,181 +1,362 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
-
 name: Publish Jar
 
 on:
   workflow_dispatch:
     inputs:
-      mc_version:
-        description: 'Minecraft Version'
+      dry_run:
+        description: Build and validate without publishing
         required: true
-        type: 'string'
-        default: '1.20.1'
-      mod_version:
-        description: 'Mod Version'
-        required: true
-        type: 'string'
-        default: '1.0.0'
-      version_type:
-        description: 'Version Type'
-        required: true
-        type: 'choice'
-        options:
-          - 'alpha'
-          - 'beta'
-          - 'release'
-        default: 'beta'
+        type: boolean
+        default: true
       publish_forge:
-        description: 'Publish Forge'
+        description: Publish Forge to selected mod platforms
         required: true
-        type: 'boolean'
+        type: boolean
         default: true
       publish_fabric:
-        description: 'Publish Fabric'
+        description: Publish Fabric to selected mod platforms
         required: true
-        type: 'boolean'
+        type: boolean
         default: true
       publish_to_curseforge:
-        description: 'Publish to CurseForge'
+        description: Publish to CurseForge
         required: true
-        type: 'boolean'
+        type: boolean
         default: false
       publish_to_modrinth:
-        description: 'Publish to Modrinth'
+        description: Publish to Modrinth
         required: true
-        type: 'boolean'
+        type: boolean
         default: false
       publish_github_release:
-        description: 'Publish GitHub Release'
+        description: Publish GitHub Release
         required: true
-        type: 'boolean'
+        type: boolean
         default: true
-
-env:
-  JAVA_VERSION: 17
-  VERSION_TITLE: "${{inputs.mc_version}}+${{inputs.mod_version}}-${{inputs.version_type}}"
 
 permissions:
   contents: write
 
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
-
+    name: Build, validate, and publish
     runs-on: ubuntu-latest
     steps:
-      - name: Check Environment Variables
-        run: env
-
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v7
         with:
           submodules: true
 
-      - name: Setup Java
-        uses: actions/setup-java@v2
+      - name: Read and validate release configuration
+        id: release
+        shell: bash
+        env:
+          ACT: ${{ env.ACT }}
+          DRY_RUN: ${{ inputs.dry_run }}
+          PUBLISH_FABRIC: ${{ inputs.publish_fabric }}
+          PUBLISH_FORGE: ${{ inputs.publish_forge }}
+          PUBLISH_CURSEFORGE: ${{ inputs.publish_to_curseforge }}
+          PUBLISH_MODRINTH: ${{ inputs.publish_to_modrinth }}
+          PUBLISH_GITHUB: ${{ inputs.publish_github_release }}
+        run: |
+          set -euo pipefail
+          property() {
+            sed -n "s/^[[:space:]]*$1[[:space:]]*=[[:space:]]*//p" gradle.properties | tail -n 1 | tr -d '\r'
+          }
+
+          mod_version="$(property mod_version)"
+          minecraft_version="$(property minecraft_version)"
+          archives_name="$(property archives_name)"
+          if [[ -z "$mod_version" || -z "$minecraft_version" || -z "$archives_name" ]]; then
+            echo "::error::mod_version, minecraft_version, and archives_name must be set in gradle.properties"
+            exit 1
+          fi
+          version_type=release
+          prerelease=false
+          if [[ "$mod_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            :
+          elif [[ "$mod_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-alpha(\.[0-9A-Za-z-]+)*$ ]]; then
+            version_type=alpha
+            prerelease=true
+          elif [[ "$mod_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+-(beta|rc)(\.[0-9A-Za-z-]+)*$ ]]; then
+            version_type=beta
+            prerelease=true
+          else
+            echo "::error::mod_version must be stable SemVer or use an alpha, beta, or rc prerelease: $mod_version"
+            exit 1
+          fi
+
+          release_version="$minecraft_version-$mod_version"
+
+          publish=true
+          if [[ "$DRY_RUN" == "true" || "$ACT" == "true" ]]; then
+            publish=false
+          fi
+          if [[ "$publish" == "true" ]]; then
+            if [[ "${GITHUB_REF_NAME}" != "$minecraft_version" ]]; then
+              echo "::error::Releases must run from branch '$minecraft_version' (current: '${GITHUB_REF_NAME}')"
+              exit 1
+            fi
+            if [[ "$PUBLISH_CURSEFORGE" == "true" || "$PUBLISH_MODRINTH" == "true" ]] && \
+               [[ "$PUBLISH_FABRIC" != "true" && "$PUBLISH_FORGE" != "true" ]]; then
+              echo "::error::Select at least one loader"
+              exit 1
+            fi
+            if [[ "$PUBLISH_CURSEFORGE" != "true" && "$PUBLISH_MODRINTH" != "true" && "$PUBLISH_GITHUB" != "true" ]]; then
+              echo "::error::Select at least one publishing destination"
+              exit 1
+            fi
+          fi
+
+          {
+            echo "mod_version=$mod_version"
+            echo "minecraft_version=$minecraft_version"
+            echo "archives_name=$archives_name"
+            echo "version_type=$version_type"
+            echo "prerelease=$prerelease"
+            echo "publish=$publish"
+            echo "release_version=$release_version"
+            echo "title=$release_version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
         with:
-          distribution: "temurin"
-          java-version: 17
+          distribution: temurin
+          java-version: 21
 
-      - name: Make Gradle Wrapper Executable
-        if: ${{ runner.os != 'Windows' }}
-        run: chmod +x ./gradlew
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: ${{ inputs.dry_run || env.ACT == 'true' }}
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Reject duplicate GitHub release tags
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_github_release }}
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.release_version }}
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_VERSION}" > /dev/null; then
+            echo "::error::Tag ${RELEASE_VERSION} already exists"
+            exit 1
+          fi
 
       - name: Build
-        run: ./gradlew clean build -Pmod_version=${{inputs.mod_version}}
+        run: ./gradlew clean build --no-daemon
 
-      - name: Publish Fabric GitHub Release
-        if: ${{ inputs.publish_fabric == true && inputs.publish_github_release == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+      - name: Prepare and validate release candidates
+        id: candidates
+        shell: bash
+        env:
+          MOD_VERSION: ${{ steps.release.outputs.mod_version }}
+          MINECRAFT_VERSION: ${{ steps.release.outputs.minecraft_version }}
+          ARCHIVES_NAME: ${{ steps.release.outputs.archives_name }}
+          PUBLISH: ${{ steps.release.outputs.publish }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+
+          select_jar() {
+            local loader="$1"
+            mapfile -t jars < <(find "$loader/build/libs" -maxdepth 1 -type f -name '*.jar' \
+              ! -name '*-dev.jar' ! -name '*-dev-shadow.jar' ! -name '*-sources.jar' \
+              ! -name '*-javadoc.jar' ! -name '*-shadow.jar' | sort)
+            if [[ ${#jars[@]} -ne 1 ]]; then
+              echo "::error::Expected exactly one distributable $loader JAR, found ${#jars[@]}"
+              printf '%s\n' "${jars[@]}"
+              exit 1
+            fi
+            local loader_name="${loader^}"
+            cp "${jars[0]}" "dist/${ARCHIVES_NAME}-${loader_name}-${MINECRAFT_VERSION}-${MOD_VERSION}.jar"
+          }
+
+          select_jar fabric
+          select_jar forge
+
+          fabric_jar="dist/${ARCHIVES_NAME}-Fabric-${MINECRAFT_VERSION}-${MOD_VERSION}.jar"
+          forge_jar="dist/${ARCHIVES_NAME}-Forge-${MINECRAFT_VERSION}-${MOD_VERSION}.jar"
+          unzip -tq "$fabric_jar"
+          unzip -tq "$forge_jar"
+          unzip -p "$fabric_jar" fabric.mod.json | grep -Eq "\"version\"[[:space:]]*:[[:space:]]*\"${MOD_VERSION}\""
+          unzip -p "$forge_jar" META-INF/mods.toml | grep -Eq "version[[:space:]]*=[[:space:]]*\"${MOD_VERSION}\""
+
+          for jar in "$fabric_jar" "$forge_jar"; do
+            class_name="$(unzip -Z1 "$jar" | grep '^top/leonx/dynlight/.*\.class$' | head -n 1 | sed 's#/#.#g; s#\.class$##')"
+            if [[ -z "$class_name" ]]; then
+              echo "::error::$jar contains no project classes"
+              exit 1
+            fi
+            major="$(javap -verbose -classpath "$jar" "$class_name" | sed -n 's/.*major version: //p' | head -n 1)"
+            if [[ "$major" != "61" ]]; then
+              echo "::error::$jar targets Java class version $major; expected 61 (Java 17)"
+              exit 1
+            fi
+          done
+
+          fabric_license="$(unzip -p "$fabric_jar" fabric.mod.json | sed -n 's/.*"license"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+          forge_license="$(unzip -p "$forge_jar" META-INF/mods.toml | sed -n 's/^license[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+          if [[ "$fabric_license" != "$forge_license" ]]; then
+            if [[ "$PUBLISH" == "true" ]]; then
+              echo "::error::Loader metadata licenses differ: Fabric=$fabric_license, Forge=$forge_license"
+              exit 1
+            fi
+            echo "::warning::Loader metadata licenses differ: Fabric=$fabric_license, Forge=$forge_license"
+          fi
+
+          if ! awk -v version="$MOD_VERSION" '
+            $0 ~ "^## \\[?" version "\\]?$" { found=1; print; next }
+            found && /^## / { exit }
+            found { print }
+            END { if (!found) exit 1 }
+          ' CHANGELOG.md > dist/release-notes.md; then
+            if [[ "$PUBLISH" == "true" ]]; then
+              echo "::error::CHANGELOG.md has no section for $MOD_VERSION"
+              exit 1
+            fi
+            echo "::warning::CHANGELOG.md has no section for $MOD_VERSION"
+            printf '## %s\n\nRelease notes are not available yet.\n' "$MOD_VERSION" > dist/release-notes.md
+          fi
+
+          sha256sum dist/*.jar | tee dist/SHA256SUMS
+          echo "fabric=$fabric_jar" >> "$GITHUB_OUTPUT"
+          echo "forge=$forge_jar" >> "$GITHUB_OUTPUT"
+
+      - name: Upload validated release candidates
+        uses: actions/upload-artifact@v4
         with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
+          name: release-candidates-${{ steps.release.outputs.release_version }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
 
-          name: "Fabric ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "fabric-${{inputs.mod_version}}"
+      - name: Validate publishing credentials
+        if: ${{ steps.release.outputs.publish == 'true' }}
+        shell: bash
+        env:
+          MODRINTH_ID: ${{ vars.MODRINTH_ID }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_ID: ${{ vars.CURSEFORGE_ID }}
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ inputs.publish_to_modrinth }}" == "true" ]]; then
+            [[ -n "$MODRINTH_ID" ]] || { echo "::error::Repository variable MODRINTH_ID is missing"; exit 1; }
+            [[ -n "$MODRINTH_TOKEN" ]] || { echo "::error::Repository secret MODRINTH_TOKEN is missing"; exit 1; }
+          fi
+          if [[ "${{ inputs.publish_to_curseforge }}" == "true" ]]; then
+            [[ -n "$CURSEFORGE_ID" ]] || { echo "::error::Repository variable CURSEFORGE_ID is missing"; exit 1; }
+            [[ -n "$CURSEFORGE_TOKEN" ]] || { echo "::error::Repository secret CURSEFORGE_TOKEN is missing"; exit 1; }
+          fi
 
-          fail-mode: warn
+      - name: Publish GitHub release
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_github_release }}
+        uses: Kira-NT/mc-publish@v3.3.1
+        with:
+          github-token: ${{ github.token }}
+          github-tag: ${{ steps.release.outputs.release_version }}
+          github-commitish: ${{ github.sha }}
+          github-prerelease: ${{ steps.release.outputs.prerelease }}
+          name: ${{ steps.release.outputs.title }}
+          changelog-file: dist/release-notes.md
+          files: |
+            ${{ steps.candidates.outputs.fabric }}
+            ${{ steps.candidates.outputs.forge }}
+          version: ${{ steps.release.outputs.release_version }}
+          version-type: ${{ steps.release.outputs.version_type }}
+          retry-attempts: 2
+          fail-mode: fail
 
       - name: Publish Fabric CurseForge
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_curseforge == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_fabric && inputs.publish_to_curseforge }}
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
-          curseforge-id: "${{vars.CURSEFORGE_ID}}"
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
-
-          name: "Fabric ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "fabric-${{inputs.mod_version}}"
-
-          fail-mode: warn
+          curseforge-id: ${{ vars.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: Fabric-${{ steps.release.outputs.release_version }}
+          changelog-file: dist/release-notes.md
+          files: ${{ steps.candidates.outputs.fabric }}
+          version: Fabric-${{ steps.release.outputs.release_version }}
+          version-type: ${{ steps.release.outputs.version_type }}
+          loaders: fabric
+          game-versions: ${{ steps.release.outputs.minecraft_version }}
+          game-version-filter: none
+          java: 17
+          environment: client
+          dependencies: |
+            fabric-api(required){curseforge:306612}
+            create(required){curseforge:create}
+            sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
+          retry-attempts: 2
+          fail-mode: fail
 
       - name: Publish Fabric Modrinth
-        if: ${{ inputs.publish_fabric == true && inputs.publish_to_modrinth == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_fabric && inputs.publish_to_modrinth }}
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
-          modrinth-id: "${{vars.MODRINTH_ID}}"
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          name: "Fabric ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: fabric/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "fabric-${{inputs.mod_version}}"
-
-          fail-mode: warn
-
-      - name: Publish Forge GitHub Release
-        if: ${{ inputs.publish_forge == true && inputs.publish_github_release == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
-        with:
-          github-token: "${{secrets.PUBLISH_TOKEN}}"
-
-          name: "Forge ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "forge-${{inputs.mod_version}}"
-
-          fail-mode: warn
+          modrinth-id: ${{ vars.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          name: Fabric-${{ steps.release.outputs.release_version }}
+          changelog-file: dist/release-notes.md
+          files: ${{ steps.candidates.outputs.fabric }}
+          version: Fabric-${{ steps.release.outputs.release_version }}
+          version-type: ${{ steps.release.outputs.version_type }}
+          loaders: fabric
+          game-versions: ${{ steps.release.outputs.minecraft_version }}
+          game-version-filter: none
+          java: 17
+          environment: client
+          dependencies: |
+            fabric-api(required){modrinth:P7dR8mSH}
+            create(required){modrinth:create}
+            sodium-dynamic-lights(optional){modrinth:sodium-dynamic-lights}
+          retry-attempts: 2
+          fail-mode: fail
 
       - name: Publish Forge CurseForge
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_curseforge == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_forge && inputs.publish_to_curseforge }}
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
-          curseforge-id: "${{vars.CURSEFORGE_ID}}"
-          curseforge-token: "${{secrets.CURSEFORGE_TOKEN}}"
-
-          name: "Forge ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "forge-${{inputs.mod_version}}"
-
-          fail-mode: warn
-
+          curseforge-id: ${{ vars.CURSEFORGE_ID }}
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+          name: Forge-${{ steps.release.outputs.release_version }}
+          changelog-file: dist/release-notes.md
+          files: ${{ steps.candidates.outputs.forge }}
+          version: Forge-${{ steps.release.outputs.release_version }}
+          version-type: ${{ steps.release.outputs.version_type }}
+          loaders: forge
+          game-versions: ${{ steps.release.outputs.minecraft_version }}
+          game-version-filter: none
+          java: 17
+          environment: client
+          dependencies: |
+            create(required){curseforge:create}
+            sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
+          retry-attempts: 2
+          fail-mode: fail
 
       - name: Publish Forge Modrinth
-        if: ${{ inputs.publish_forge == true && inputs.publish_to_modrinth == true }}
-        uses: Kir-Antipov/mc-publish@v3.3
+        if: ${{ steps.release.outputs.publish == 'true' && inputs.publish_forge && inputs.publish_to_modrinth }}
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
-          modrinth-id: "${{vars.MODRINTH_ID}}"
-          modrinth-token: "${{secrets.MODRINTH_TOKEN}}"
-
-          name: "Forge ${{ENV.VERSION_TITLE}}"
-          changelog-file: CHANGELOG.md
-          files: forge/build/libs/!(*-dev|*-sources|*-javadoc|*-shadow).jar
-          version-type: ${{inputs.version_type}}
-          version: "forge-${{inputs.mod_version}}"
-
-          fail-mode: warn
+          modrinth-id: ${{ vars.MODRINTH_ID }}
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          name: Forge-${{ steps.release.outputs.release_version }}
+          changelog-file: dist/release-notes.md
+          files: ${{ steps.candidates.outputs.forge }}
+          version: Forge-${{ steps.release.outputs.release_version }}
+          version-type: ${{ steps.release.outputs.version_type }}
+          loaders: forge
+          game-versions: ${{ steps.release.outputs.minecraft_version }}
+          game-version-filter: none
+          java: 17
+          environment: client
+          dependencies: |
+            create(required){modrinth:create}
+            sodium-dynamic-lights(optional){modrinth:sodium-dynamic-lights}
+          retry-attempts: 2
+          fail-mode: fail
