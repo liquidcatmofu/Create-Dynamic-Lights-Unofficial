@@ -291,7 +291,7 @@ jobs:
           dependencies: |
             fabric-api(required){curseforge:306612}
             create(required){curseforge:create}
-            sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
+            sodium-dynamic-lights(optional){curseforge:551736}
             ryoamiclights(optional){curseforge:913587}
           retry-attempts: 2
           fail-mode: fail
