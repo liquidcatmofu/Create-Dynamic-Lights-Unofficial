@@ -35,6 +35,15 @@ The project IDs must identify this fork's projects, not the original mod's proje
 
 The CurseForge and Modrinth project pages may remain unavailable while the projects are drafts or awaiting moderation. Add public download links and badges to the README only after both pages are accessible without authentication.
 
+## Project descriptions
+
+The platform descriptions are maintained separately for direct copy and paste:
+
+- CurseForge: [`README_CURSEFORGE.md`](../README_CURSEFORGE.md)
+- Modrinth: [`README_MODRINTH.md`](../README_MODRINTH.md)
+
+Update both descriptions whenever supported versions, loaders, dependencies, features, or limitations change. The release workflow uploads files and changelogs but does not update either project's long description.
+
 ## Prepare a release
 
 1. Update `mod_version` in `gradle.properties`.
