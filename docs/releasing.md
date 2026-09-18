@@ -12,8 +12,8 @@ For Minecraft `1.20.1` and mod version `2.0.0`, the workflow derives:
 Mod metadata:       2.0.0
 Git tag:            1.20.1-2.0.0
 GitHub release:     1.20.1-2.0.0
-Fabric JAR:         create-dyn-light-Fabric-1.20.1-2.0.0.jar
-Forge JAR:          create-dyn-light-Forge-1.20.1-2.0.0.jar
+Fabric JAR:         CreateDynamicLightsUnofficial-Fabric-1.20.1-2.0.0.jar
+Forge JAR:          CreateDynamicLightsUnofficial-Forge-1.20.1-2.0.0.jar
 Fabric platform ID: Fabric-1.20.1-2.0.0
 Forge platform ID:  Forge-1.20.1-2.0.0
 ```
