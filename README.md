@@ -1,6 +1,6 @@
 # Create: Dynamic Lights (Unofficial)
 
-An unofficial maintenance fork of Create: Dynamic Lights for Minecraft 1.20.1 and Create 6.
+An unofficial maintenance fork of [Create: Dynamic Lights](https://github.com/leon-o/Create-Dynamic-Lights) for Minecraft 1.20.1 and Create 6.
 
 It adds lighting to moving Create contraptions in two ways: smooth client-side dynamic lighting through Sodium Dynamic Lights or RyoamicLights, and optional server-side vanilla light blocks. Maintenance is provided on a best-effort basis.
 
