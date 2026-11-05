@@ -6,9 +6,16 @@ The project follows [Semantic Versioning](https://semver.org/). Release tags com
 
 ## [Unreleased]
 
+## [2.1.0]
+
 ### Added
 
 - Added optional Forge integration with Cheap Lighting 1.3+, including backend mode toggles and renderer reload recovery.
+
+### Changed
+
+- Forge selects dynamic-light backends in this order: Sodium Dynamic Lights, RyoamicLights, then Cheap Lighting. Client dynamic-light events are disabled when no backend is installed.
+- Added Forge development client options for Cheap Lighting and for running without a dynamic-light backend.
 
 ## [2.0.0]
 

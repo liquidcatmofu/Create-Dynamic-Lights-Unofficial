@@ -340,6 +340,7 @@ jobs:
             create(required){curseforge:create}
             sodium-dynamic-lights(optional){curseforge:sodium-dynamic-lights}
             ryoamiclights(optional){curseforge:913587}
+            cheap-lighting(optional){curseforge:1618697}
           retry-attempts: 2
           fail-mode: fail
 
