@@ -3,8 +3,15 @@ plugins {
 }
 
 def dynamicLightsBackend = providers.gradleProperty('dynamicLightsBackend').getOrElse('sodium')
-if (!['sodium', 'ryoamic'].contains(dynamicLightsBackend)) {
-    throw new GradleException("dynamicLightsBackend must be 'sodium' or 'ryoamic'")
+if (!['sodium', 'ryoamic', 'cheap', 'none'].contains(dynamicLightsBackend)) {
+    throw new GradleException("dynamicLightsBackend must be 'sodium', 'ryoamic', 'cheap' or 'none'")
+}
+
+repositories {
+    exclusiveContent {
+        forRepository { maven { url = 'https://cursemaven.com' } }
+        filter { includeGroup 'curse.maven' }
+    }
 }
 
 loom {
@@ -55,11 +62,14 @@ dependencies {
     modCompileOnly ("maven.modrinth:sodium-dynamic-lights:${dynamiclights_forge_version}")
     modCompileOnly ("maven.modrinth:reCfnRvJ:${ryoamiclights_forge_version}")
     modCompileOnly ("maven.modrinth:obsidianui:${obsidianui_version}-forge")
+    modCompileOnly ("curse.maven:cheap-lighting-1618697:${cheaplighting_forge_version}") { transitive = false }
     if (dynamicLightsBackend == 'ryoamic') {
         modLocalRuntime ("maven.modrinth:reCfnRvJ:${ryoamiclights_forge_version}")
         modLocalRuntime ("maven.modrinth:obsidianui:${obsidianui_version}-forge")
         modLocalRuntime ("dev.architectury:architectury-forge:${architectury_api_version}")
-    } else {
+    } else if (dynamicLightsBackend == 'cheap') {
+        modLocalRuntime ("curse.maven:cheap-lighting-1618697:${cheaplighting_forge_version}") { transitive = false }
+    } else if (dynamicLightsBackend == 'sodium') {
         modLocalRuntime ("maven.modrinth:sodium-dynamic-lights:${dynamiclights_forge_version}")
     }
     forgeRuntimeLibrary ('org.anarres:jcpp:1.4.14')

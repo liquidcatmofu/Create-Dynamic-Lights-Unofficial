@@ -12,6 +12,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import top.leonx.dynlight.CreateDynLight;
 import top.leonx.dynlight.config.forge.CreateDynLightAllConfigsImpl;
 import top.leonx.dynlight.dynamiclight.forge.DynamicLightsDelegateImpl;
+import top.leonx.dynlight.dynamiclight.forge.DynamicLightsBackend;
 
 @Mod(CreateDynLight.MOD_ID)
 public final class CreateDynLightForge {
@@ -36,13 +37,12 @@ public final class CreateDynLightForge {
         boolean hasSodiumDynamicLights = ModList.get().isLoaded("sodiumdynamiclights");
         boolean hasRyoamicLights = ModList.get().isLoaded("ryoamiclights");
 
-        if (hasSodiumDynamicLights && hasRyoamicLights) {
-            CreateDynLight.LOGGER.warn("Both Sodium Dynamic Lights and RyoamicLights are installed; using Sodium Dynamic Lights");
-        } else if (hasRyoamicLights) {
-            DynamicLightsDelegateImpl.useRyoamicLights();
-        }
+        boolean hasCheapLighting = ModList.get().isLoaded("cheaplighting");
+        var backend = DynamicLightsBackend.select(hasSodiumDynamicLights, hasRyoamicLights, hasCheapLighting);
+        DynamicLightsDelegateImpl.setBackend(backend);
+        CreateDynLight.LOGGER.info("Dynamic lighting backend: {} (priority: Sodium > Ryoamic > Cheap)", backend);
 
-        if (hasSodiumDynamicLights || hasRyoamicLights) {
+        if (backend != DynamicLightsBackend.NONE) {
             t.enqueueWork(()->{
                 var forgeEventBus = MinecraftForge.EVENT_BUS;
                 forgeEventBus.addListener(CreateDynLightModEventHandler::onEntityJoinWorld);
