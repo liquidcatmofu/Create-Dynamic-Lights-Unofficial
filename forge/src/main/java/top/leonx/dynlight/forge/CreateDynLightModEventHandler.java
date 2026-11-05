@@ -5,6 +5,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import top.leonx.dynlight.dynamiclight.ContraptionEntityEventHandler;
+import top.leonx.dynlight.dynamiclight.forge.DynamicLightsDelegateImpl;
 
 
 public class CreateDynLightModEventHandler {
@@ -39,6 +40,7 @@ public class CreateDynLightModEventHandler {
         }
         if (event.phase == TickEvent.Phase.END) {
             ContraptionEntityEventHandler.onTick();
+            DynamicLightsDelegateImpl.tick();
         }
     }
 }

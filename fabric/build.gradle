@@ -3,6 +3,10 @@ plugins {
 }
 
 def dynamicLightsBackend = providers.gradleProperty('dynamicLightsBackend').getOrElse('sodium')
+// The root property also configures Forge; Cheap Lighting is Forge-only.
+if (dynamicLightsBackend == 'cheap' || dynamicLightsBackend == 'none') {
+    dynamicLightsBackend = 'sodium'
+}
 if (!['sodium', 'ryoamic'].contains(dynamicLightsBackend)) {
     throw new GradleException("dynamicLightsBackend must be 'sodium' or 'ryoamic'")
 }

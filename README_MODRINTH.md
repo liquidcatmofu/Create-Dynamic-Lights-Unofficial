@@ -7,7 +7,7 @@ It adds lighting to moving Create contraptions through smooth client-side dynami
 ## Features
 
 - Adds smooth, moving light sources to illuminated blocks on Create contraptions.
-- Supports Sodium Dynamic Lights and RyoamicLights as alternative client-side backends.
+- Supports Sodium Dynamic Lights, RyoamicLights, and Cheap Lighting (Forge only) as alternative client-side backends.
 - Can place invisible vanilla light blocks while contraptions move, allowing server-side light to affect mob spawning, snow, and ice.
 - Provides configurable luminance scaling and update intervals.
 - Supports client-only, server-only, and client-and-server installation.
@@ -17,13 +17,13 @@ It adds lighting to moving Create contraptions through smooth client-side dynami
 | Loader | Minecraft | Create | Dynamic-light backend |
 | --- | --- | --- | --- |
 | Fabric | 1.20.1 | Create Fabric 6.0.x | Sodium Dynamic Lights 1.0.x or RyoamicLights 0.2.3 |
-| Forge | 1.20.1 with Forge 47.x | Create 6.0.x | Sodium Dynamic Lights 1.0.x or RyoamicLights 0.2.3 |
+| Forge | 1.20.1 with Forge 47.x | Create 6.0.x | Sodium Dynamic Lights 1.0.x, RyoamicLights 0.2.3, or Cheap Lighting 1.3+ |
 
 - Java 17 is required.
 - Fabric also requires Fabric API.
 - Fabric and Forge use separate JARs; install the one matching your loader.
 - RyoamicLights requires compatible ObsidianUI and Architectury API versions.
-- If both dynamic-light backends are installed, this mod uses Sodium Dynamic Lights.
+- Backend priority is Sodium Dynamic Lights > RyoamicLights > Cheap Lighting (Forge only).
 
 ## Installation sides
 
@@ -33,7 +33,7 @@ It adds lighting to moving Create contraptions through smooth client-side dynami
 | Server only | Optional vanilla light blocks. Clients do not need this mod. |
 | Client and server | Both behaviors are available and can be configured independently. |
 
-Without Sodium Dynamic Lights or RyoamicLights, client-side smooth lighting is inactive. The server-side light-block feature remains available.
+Without a supported backend, client-side smooth lighting is inactive. The server-side light-block feature remains available.
 
 ## Configuration
 

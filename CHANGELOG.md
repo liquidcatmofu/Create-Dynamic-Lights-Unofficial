@@ -6,6 +6,10 @@ The project follows [Semantic Versioning](https://semver.org/). Release tags com
 
 ## [Unreleased]
 
+### Added
+
+- Added optional Forge integration with Cheap Lighting 1.3+, including backend mode toggles and renderer reload recovery.
+
 ## [2.0.0]
 
 ### Added
